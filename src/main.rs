@@ -1,10 +1,11 @@
-use std::{thread::sleep, time::Duration};
+use std::{thread::sleep, time::{Duration, Instant}};
 use console::{Style, Term};
 use rand::Rng;
 
 const WIDTH: i32 = 100;  // ターミナルの幅
-const HEIGHT: i32 = 24;  // ターミナルの高さ
-const PETAL_COUNT: usize = 50;
+const HEIGHT: i32 = 30;  // ターミナルの高さ
+const PETAL_COUNT: usize = 25;
+const PETAL_GENERATION_INTERVAL_MS: u64 = 350; // 花びらの生成間隔（ミリ秒）
 
 fn main() {
     let term = Term::stdout();
@@ -43,13 +44,7 @@ fn main() {
     let petal_start_x = x + 23;
     let petal_start_y = y + 3; // 花びらの生成位置を調整
 
-    let mut petals: Vec<(i32, i32)> = (0..PETAL_COUNT)
-        .map(|_| {
-            let px = rng.gen_range(petal_start_x..petal_start_x + 7); // 木の上部から横方向に設定
-            let py = rng.gen_range(petal_start_y..petal_start_y + 7); // 木の上部から設定
-            (px, py)
-        })
-        .collect();
+    let mut petals: Vec<(i32, i32)> = Vec::with_capacity(PETAL_COUNT);
 
     term.hide_cursor().unwrap();
 
@@ -62,6 +57,8 @@ fn main() {
     term.move_cursor_to(x as usize, trunk_pos_y as usize).unwrap();
     print!("{}", brown.apply_to(trunk));
 
+    let mut last_generation_time = Instant::now();
+
     loop {
         // 花びらのみをクリア
         for &(px, py) in &petals {
@@ -72,15 +69,29 @@ fn main() {
         }
 
         // 花びらの位置を更新
+        petals.retain(|&(_px, py)| py < HEIGHT); // 画面内の花びらのみ保持
+
         for petal in petals.iter_mut() {
             petal.1 += 1; // 花びらを下に移動
-            petal.0 += rng.gen_range(0..=5); // 横方向に移動
+            petal.0 += rng.gen_range(1..=10); // 横方向に移動
 
             // 縦方向の移動制限
             if petal.1 >= HEIGHT { // 画面の下端に到達したら上端に戻す
                 petal.0 = petal_start_x;
                 petal.1 = petal_start_y; // 木の上部よりさらに下に戻す
             }
+        }
+
+        // 新しい花びらを生成するタイミングを制御
+        if last_generation_time.elapsed() >= Duration::from_millis(PETAL_GENERATION_INTERVAL_MS) {
+            if petals.len() < PETAL_COUNT {
+                let new_petal = (
+                    rng.gen_range(petal_start_x..petal_start_x + 7), // 木の上部から横方向に設定
+                    petal_start_y, // 木の上部から設定
+                );
+                petals.push(new_petal);
+            }
+            last_generation_time = Instant::now(); // 最後の生成時間を更新
         }
 
         // 花びらを再描画
