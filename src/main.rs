@@ -1,3 +1,5 @@
+use std::{thread::sleep, time::Duration};
+
 use console::{Style, Term};
 
 fn main() {
@@ -12,7 +14,7 @@ fn main() {
     ゞ ,(、、|| ;| / /  ノ
         (、、  ,)  || ﾉ  ))
         ゞ  ,r || |,,ノ~
-";
+    ";
     let trunk = r"
             〉 / ヾ |
             | ゝﾉ/  |
@@ -21,24 +23,20 @@ fn main() {
             ﾉ |  /\ |
             〉ﾉ  ||  ヾﾞ
             ノし、し ヽ ﾞ
-";
+    ";
 
-    // let tree = r"
-    //        （
-    //         （、、             ））
-    //           \_           __ゞ )
-    //         ゞ ,(、、|| ;| / /  ノ
-    //          (、、  ,)  || ﾉ  ))
-    //             ゞ  ,r || |,,ノ~
-    //                〉 / ヾ |
-    //                | ゝﾉ/  |
-    //                |  || 〉|
-    //                |,|   〉|
-    //                ﾉ |  /\ |
-    //                〉ﾉ  ||  ヾﾞ
-    //                ノし、し ヽ ﾞ
-    // ";
+    let x = 5;
+    let y = 10;
 
-    println!("{}{}", pink.apply_to(foliage), blown.apply_to(trunk));
-    term.clear_line().unwrap();
+    let mut buffer = String::new();
+    term.clear_screen().unwrap();
+
+    loop {
+        buffer.clear();
+        buffer.push_str(&format!("{}{}", pink.apply_to(foliage), blown.apply_to(trunk)));
+        term.move_cursor_to(x, y).unwrap();
+        print!("{}", buffer);
+
+        sleep(Duration::from_millis(500));
+    }
 }
