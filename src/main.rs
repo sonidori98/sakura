@@ -2,9 +2,9 @@ use std::{thread::sleep, time::Duration};
 use console::{Style, Term};
 use rand::Rng;
 
-const WIDTH: i32 = 80;  // ターミナルの幅
+const WIDTH: i32 = 100;  // ターミナルの幅
 const HEIGHT: i32 = 24;  // ターミナルの高さ
-const PETAL_COUNT: usize = 20;
+const PETAL_COUNT: usize = 50;
 
 fn main() {
     let term = Term::stdout();
@@ -39,8 +39,16 @@ fn main() {
     let y = HEIGHT - trunk_height - foliage_height;  // 隙間をなくすために調整
 
     let mut rng = rand::thread_rng();
+
+    let petal_start_x = x + 23;
+    let petal_start_y = y + 3; // 花びらの生成位置を調整
+
     let mut petals: Vec<(i32, i32)> = (0..PETAL_COUNT)
-        .map(|_| (rng.gen_range(x + 20..x + 30), rng.gen_range(y..y + foliage_height))) // 花びらの初期位置を葉の上端に設定
+        .map(|_| {
+            let px = rng.gen_range(petal_start_x..petal_start_x + 7); // 木の上部から横方向に設定
+            let py = rng.gen_range(petal_start_y..petal_start_y + 7); // 木の上部から設定
+            (px, py)
+        })
         .collect();
 
     term.hide_cursor().unwrap();
@@ -57,7 +65,7 @@ fn main() {
     loop {
         // 花びらのみをクリア
         for &(px, py) in &petals {
-            if px >= x + 20 && px < x + 30 && (0..HEIGHT).contains(&py) {
+            if (0..WIDTH).contains(&px) && (0..HEIGHT).contains(&py) {
                 term.move_cursor_to(px as usize, py as usize).unwrap();
                 print!(" ");  // 空白で花びらを消す
             }
@@ -66,15 +74,18 @@ fn main() {
         // 花びらの位置を更新
         for petal in petals.iter_mut() {
             petal.1 += 1; // 花びらを下に移動
-            if petal.1 >= y + 20 { // 花びらが幹の下端に到達したら、画面の上部に再配置
-                petal.1 = y; // 初期位置に戻す
-                petal.0 = rng.gen_range(x + 20..x + 30);
+            petal.0 += rng.gen_range(0..=5); // 横方向に移動
+
+            // 縦方向の移動制限
+            if petal.1 >= HEIGHT { // 画面の下端に到達したら上端に戻す
+                petal.0 = petal_start_x;
+                petal.1 = petal_start_y; // 木の上部よりさらに下に戻す
             }
         }
 
         // 花びらを再描画
         for &(px, py) in &petals {
-            if px >= x + 20 && px < x + 30 && (0..HEIGHT).contains(&py) {
+            if (0..WIDTH).contains(&px) && (0..HEIGHT).contains(&py) {
                 term.move_cursor_to(px as usize, py as usize).unwrap();
                 print!("{}", pink.apply_to(petal));
             }
