@@ -1,6 +1,10 @@
-use std::{sync::{Arc, Mutex}, thread::sleep, time::{Duration, Instant}};
 use console::{Style, Term};
 use rand::Rng;
+use std::{
+    sync::{Arc, Mutex},
+    thread::sleep,
+    time::{Duration, Instant},
+};
 
 const WIDTH: i32 = 100;
 const HEIGHT: i32 = 30;
@@ -50,9 +54,15 @@ fn main() {
     term.lock().unwrap().clear_screen().unwrap();
     let foliage_pos_y = y;
     let trunk_pos_y = y + foliage_height - 1;
-    term.lock().unwrap().move_cursor_to(x as usize, foliage_pos_y as usize).unwrap();
+    term.lock()
+        .unwrap()
+        .move_cursor_to(x as usize, foliage_pos_y as usize)
+        .unwrap();
     print!("{}", pink.apply_to(foliage));
-    term.lock().unwrap().move_cursor_to(x as usize, trunk_pos_y as usize).unwrap();
+    term.lock()
+        .unwrap()
+        .move_cursor_to(x as usize, trunk_pos_y as usize)
+        .unwrap();
     print!("{}", brown.apply_to(trunk));
 
     let mut last_generation_time = Instant::now();
@@ -61,12 +71,16 @@ fn main() {
     ctrlc::set_handler(move || {
         term_clone.lock().unwrap().clear_screen().unwrap();
         std::process::exit(0);
-    }).expect("Error setting Ctrl-C handler");
+    })
+    .expect("Error setting Ctrl-C handler");
 
     loop {
         for &(px, py) in &petals {
             if (0..WIDTH).contains(&px) && (0..HEIGHT).contains(&py) {
-                term.lock().unwrap().move_cursor_to(px as usize, py as usize).unwrap();
+                term.lock()
+                    .unwrap()
+                    .move_cursor_to(px as usize, py as usize)
+                    .unwrap();
                 print!(" ");
             }
         }
@@ -96,7 +110,10 @@ fn main() {
 
         for &(px, py) in &petals {
             if (0..WIDTH).contains(&px) && (0..HEIGHT).contains(&py) {
-                term.lock().unwrap().move_cursor_to(px as usize, py as usize).unwrap();
+                term.lock()
+                    .unwrap()
+                    .move_cursor_to(px as usize, py as usize)
+                    .unwrap();
                 print!("{}", pink.apply_to(petal));
             }
         }
