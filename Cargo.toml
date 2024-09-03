@@ -6,5 +6,5 @@ edition = "2021"
 [dependencies]
 console = "0.15.8"
 crossterm = "0.28.1"
-ctrlc = "3.4.4"
+ctrlc = "3.4.5"
 rand = "0.8.5"
