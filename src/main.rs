@@ -1,15 +1,13 @@
 use console::{Style, Term};
+use core::panic;
 use crossterm::terminal::size;
 use rand::Rng;
-use core::panic;
 use std::{
     sync::{Arc, Mutex, OnceLock},
     thread::sleep,
     time::{Duration, Instant},
 };
 
-// const WIDTH: i32 = 100;
-// const HEIGHT: i32 = 30;
 static WIDTH: OnceLock<i32> = OnceLock::new();
 static HEIGHT: OnceLock<i32> = OnceLock::new();
 const PETAL_COUNT: usize = 25;
@@ -50,7 +48,12 @@ fn main() {
 
     let mut rng = rand::thread_rng();
 
-    let petal_start_x = x + 23;
+    let foliage_width = foliage
+        .lines()
+        .map(|line| line.chars().count())
+        .max()
+        .unwrap() as i32;
+    let petal_start_x = x + foliage_width / 2 + 10;
     let petal_start_y = y + 3;
 
     let mut petals: Vec<(i32, i32)> = Vec::with_capacity(PETAL_COUNT);
@@ -82,7 +85,9 @@ fn main() {
 
     loop {
         for &(px, py) in &petals {
-            if (0..*WIDTH.get().expect(ONCE_ERR)).contains(&px) && (0..*HEIGHT.get().expect(ONCE_ERR)).contains(&py) {
+            if (0..*WIDTH.get().expect(ONCE_ERR)).contains(&px)
+                && (0..*HEIGHT.get().expect(ONCE_ERR)).contains(&py)
+            {
                 term.lock()
                     .unwrap()
                     .move_cursor_to(px as usize, py as usize)
@@ -115,7 +120,9 @@ fn main() {
         }
 
         for &(px, py) in &petals {
-            if (0..*WIDTH.get().expect(ONCE_ERR)).contains(&px) && (0..*HEIGHT.get().expect(ONCE_ERR)).contains(&py) {
+            if (0..*WIDTH.get().expect(ONCE_ERR)).contains(&px)
+                && (0..*HEIGHT.get().expect(ONCE_ERR)).contains(&py)
+            {
                 term.lock()
                     .unwrap()
                     .move_cursor_to(px as usize, py as usize)
@@ -133,8 +140,8 @@ fn main() {
 fn get_size() {
     match size() {
         Ok((col, row)) => {
-            HEIGHT.set(col.into()).unwrap();
-            WIDTH.set(row.into()).unwrap();
+            HEIGHT.set(row.into()).unwrap();
+            WIDTH.set(col.into()).unwrap();
         }
         Err(e) => {
             eprintln!("Failed to get terminal size: {}", e);
